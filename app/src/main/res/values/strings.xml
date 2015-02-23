@@ -8,4 +8,8 @@
 
     <string name="no_location_detected">No location detected. Make sure location is enabled on the device</string>
 
+    <string name="picture">Picture</string>
+    <string name="description_info">Info</string>
+    <string name="intro_message">This sample blah blah blah...</string>
+
 </resources>
