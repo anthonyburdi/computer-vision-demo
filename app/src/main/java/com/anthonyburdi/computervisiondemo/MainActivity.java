@@ -9,7 +9,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +28,17 @@ import java.util.Date;
 
 public class MainActivity extends ActionBarActivity implements ConnectionCallbacks, OnConnectionFailedListener {
 
-    //    ----------------------------LOCATION-----------------------------------------
+    //    ------------------------------ CAMERA ------------------------------
+    //    FROM https://developer.android.com/training/camera/photobasics.html
+    //    https://developer.android.com/training/camera/cameradirect.html
+    //    https://developer.android.com/guide/topics/media/camera.html#custom-camera
+    //    https://github.com/josnidhin/Android-Camera-Example
+    protected static final String CamTAG = "TAG - Camera Code: ";
+//    static final int REQUEST_IMAGE_CAPTURE = 1;
+//    public ImageView mImageView;
+
+
+    //    ------------------------------ LOCATION ------------------------------
     // FROM https://developer.android.com/training/location/retrieve-current.html
     protected GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
@@ -38,8 +47,26 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
     protected TextView mLongitudeText;
 
     protected static final String LocTAG = "TAG - Location Info Code: ";
-    protected static final String CamTAG = "TAG - Camera Code: ";
+    //    ------------------------------ LOCATION ------------------------------
 
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        //    ------------------------------ LOCATION ------------------------------
+        // FROM https://developer.android.com/training/location/retrieve-current.html
+        mLatitudeText = (TextView) findViewById(R.id.latitude_text);
+        mLongitudeText = (TextView) findViewById(R.id.longitude_text);
+        buildGoogleApiClient();
+        //    ------------------------------ LOCATION ------------------------------
+        //    ------------------------------ CAMERA ------------------------------
+//        mImageView = (ImageView) findViewById(R.id.thumbnail_image_view);
+//        dispatchTakePictureIntent();
+        //    ------------------------------ CAMERA ------------------------------
+    }
+
+    //    ------------------------------ LOCATION ------------------------------
     @Override
     public void onConnected(Bundle connectionHint) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -60,56 +87,8 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
     public void onConnectionSuspended(int cause) {
         Log.i(LocTAG, "Connection suspended");
         mGoogleApiClient.connect();
-    }    //    ----------------------------LOCATION-----------------------------------------
-
-    //    ------------------------------ CAMERA ------------------------------
-////    FROM https://developer.android.com/training/camera/photobasics.html
-//
-//    static final int REQUEST_IMAGE_CAPTURE = 1;
-//    public ImageView mImageView;
-//
-//
-//    private void dispatchTakePictureIntent() {
-//        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-//            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-//        }
-//    }
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-//            Bundle extras = data.getExtras();
-//            Bitmap imageBitmap = (Bitmap) extras.get("data");
-//            mImageView.setImageBitmap(imageBitmap);
-//        }
-//    }
-    //    ------------------------------ CAMERA ------------------------------
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        //    ------------------------------ LOCATION ------------------------------
-        // FROM https://developer.android.com/training/location/retrieve-current.html
-        mLatitudeText = (TextView) findViewById(R.id.latitude_text);
-        mLongitudeText = (TextView) findViewById(R.id.longitude_text);
-        buildGoogleApiClient();
-        //    ------------------------------ LOCATION ------------------------------
-
-
-        //    ------------------------------ CAMERA ------------------------------
-//        // ADDED
-//        //    FROM https://developer.android.com/training/camera/photobasics.html
-//        mImageView = (ImageView) findViewById(R.id.thumbnail_image_view);
-//        dispatchTakePictureIntent();
-        //    ------------------------------ CAMERA ------------------------------
-
     }
 
-    //    ------------------------------ LOCATION ------------------------------
-    // FROM https://developer.android.com/training/location/retrieve-current.html
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -134,7 +113,7 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
     //    ------------------------------ LOCATION ------------------------------
 
 
-    //    ------------------------------------------------------------------------------
+    //    ------------------------------ CAMERA ------------------------------
     // FROM https://developer.android.com/guide/topics/media/camera.html#custom-camera
     /** A safe way to get an instance of the Camera object. */
 //    public static Camera getCameraInstance(){
@@ -147,8 +126,27 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
 //        }
 //        return c; // returns null if camera is unavailable
 //    }
-//    ------------------------------------------------------------------------------
 
+    //    ------------------------------ CAMERA ------------------------------
+
+//    private void dispatchTakePictureIntent() {
+//        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+//            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+//        }
+//    }
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+//            Bundle extras = data.getExtras();
+//            Bitmap imageBitmap = (Bitmap) extras.get("data");
+//            mImageView.setImageBitmap(imageBitmap);
+//        }
+//    }
+    //    ------------------------------ CAMERA ------------------------------
+
+    //    ------------------------------ BOILERPLATE ------------------------------
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -170,6 +168,8 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
 
         return super.onOptionsItemSelected(item);
     }
+    //    ------------------------------ BOILERPLATE ------------------------------
+
 
     //    ------------------------------------------------------------------------------
     // FROM https://developer.android.com/guide/topics/media/camera.html#custom-camera
