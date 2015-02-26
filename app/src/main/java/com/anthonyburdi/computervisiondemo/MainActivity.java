@@ -12,6 +12,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
+import com.parse.Parse;
+import com.parse.ParseObject;
 
 
 public class MainActivity extends ActionBarActivity implements ConnectionCallbacks, OnConnectionFailedListener {
@@ -34,6 +36,9 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
     protected TextView mLatitudeText;
     protected TextView mLongitudeText;
 
+    String mLatitude;
+    String mLongitude;
+
     protected static final String LocTAG = "TAG - Location: ";
     //    ------------------------------ LOCATION ------------------------------
 
@@ -42,6 +47,14 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //    ------------------------------ PARSE ------------------------------
+        // Enable Local Datastore.
+        Parse.enableLocalDatastore(this);
+        // Set keys
+        Parse.initialize(this, "yrdc3T0K43BDjOO2Eysq6HcbDmx92VaZlLO9O3bn", "jnFQK4OAfVTasij0jrG5ejSKbHOqlSQNNwiF6iML");
+        //    ------------------------------ PARSE ------------------------------
+
         //    ------------------------------ LOCATION ------------------------------
         // FROM https://developer.android.com/training/location/retrieve-current.html
         mLatitudeText = (TextView) findViewById(R.id.latitude_text);
@@ -73,6 +86,18 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
         if (mLastLocation != null) {
             mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
             mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
+            mLatitude = String.valueOf(mLastLocation.getLatitude());
+            mLongitude = String.valueOf(mLastLocation.getLongitude());
+            Log.d(LocTAG, "This is the latitude: "+mLatitude);
+            Log.d(LocTAG, "This is the longitude: "+mLongitude);
+            //    ------------------------------ PARSE ------------------------------
+            // Set lat & long objects
+            ParseObject testObject = new ParseObject("LocInfo");
+            testObject.put("Latitude", mLatitude);
+            testObject.put("Longitude", mLongitude);
+            testObject.saveInBackground();
+            //    ------------------------------ PARSE ------------------------------
+
         } else {
             Toast.makeText(this, R.string.no_location_detected, Toast.LENGTH_LONG).show();
         }
