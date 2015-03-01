@@ -38,6 +38,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -55,6 +61,12 @@ import java.util.concurrent.TimeUnit;
 
 public class Camera2BasicFragment extends Fragment implements View.OnClickListener {
 
+
+    //    ------------------------------ DATA STORE ------------------------------
+
+//    String mParseID;
+
+    //    ------------------------------ DATA STORE ------------------------------
 
     /**
      * Conversion from screen rotation to JPEG orientation.
@@ -740,16 +752,16 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
                 takePicture();
                 break;
             }
-//            case R.id.info: {
-//                Activity activity = getActivity();
-//                if (null != activity) {
-//                    new AlertDialog.Builder(activity)
-//                            .setMessage(R.string.intro_message)
-//                            .setPositiveButton(android.R.string.ok, null)
-//                            .show();
-//                }
-//                break;
-//            }
+            case R.id.info: {
+                Activity activity = getActivity();
+                if (null != activity) {
+                    new AlertDialog.Builder(activity)
+                            .setMessage(R.string.intro_message)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
+                }
+                break;
+            }
         }
     }
 
@@ -774,29 +786,70 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void run() {
-            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-            FileOutputStream output = null;
-            try {
-                output = new FileOutputStream(mFile);
-                output.write(bytes);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                mImage.close();
-                if (null != output) {
-                    try {
-                        output.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
+//            // get the image
+//            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
+//            byte[] bytes = new byte[buffer.remaining()];
+//            buffer.get(bytes);
+//            FileOutputStream output = null;
+//            try {
+//                output = new FileOutputStream(mFile);
+//                output.write(bytes);
+                //    ------------------------------ DATA STORE ------------------------------
+                // Get parse object created in local datastore
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("LocationAndPics");
+                query.fromLocalDatastore();
+                query.orderByDescending("createdAt");
+                query.getFirstInBackground(new GetCallback<ParseObject>() {
+                    @Override
+                    public void done(ParseObject parseObject, ParseException e) {
+                        if (e == null ) {
 
+                            // get the image
+                            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
+                            byte[] bytes = new byte[buffer.remaining()];
+                            buffer.get(bytes);
+                            FileOutputStream output = null;
+
+                            try {
+                                output = new FileOutputStream(mFile);
+                            } catch (FileNotFoundException e1) {
+                                e1.printStackTrace();
+                            }
+                            try {
+                                output.write(bytes);
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+
+                            // Write image to Parse.com database
+                            ParseFile file = new ParseFile("pic.jpg", bytes);
+                            file.saveInBackground();
+                            // Get Parse.com object
+                            ParseObject mParseSessionObject = parseObject;
+                            mParseSessionObject.put("CameraPics", file);
+                            mParseSessionObject.saveInBackground();
+
+                        } else {
+                            // somethign went wrong
+                        }
+                    }
+                });
+                //    ------------------------------ DATA STORE ------------------------------
+
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } finally {
+//                mImage.close();
+//                if (null != output) {
+//                    try {
+//                        output.close();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+        }
     }
 
     /**

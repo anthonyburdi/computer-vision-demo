@@ -40,14 +40,19 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
     String mLongitude;
 
     protected static final String LocTAG = "TAG - Location: ";
-    //    ------------------------------ LOCATION ------------------------------
 
+    String mParseID;
+    //    ------------------------------ LOCATION ------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        if (null == savedInstanceState) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.container, Camera2BasicFragment.newInstance())
+                    .commit();
+        }
         //    ------------------------------ PARSE ------------------------------
         // Enable Local Datastore.
         Parse.enableLocalDatastore(this);
@@ -57,20 +62,20 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
 
         //    ------------------------------ LOCATION ------------------------------
         // FROM https://developer.android.com/training/location/retrieve-current.html
-        mLatitudeText = (TextView) findViewById(R.id.latitude_text);
-        mLongitudeText = (TextView) findViewById(R.id.longitude_text);
+//        mLatitudeText = (TextView) findViewById(R.id.latitude_text);
+//        mLongitudeText = (TextView) findViewById(R.id.longitude_text);
         buildGoogleApiClient();
         //    ------------------------------ LOCATION ------------------------------
 
         //    ------------------------------ CAMERA2 ------------------------------
-        if (null == savedInstanceState) {
-            Log.d(CamTAG, "This is right before Camera2BasicFragment.newInstance()");
-//            ************************************************************************************
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.container, Camera2BasicFragment.newInstance())
-                    .commit();
-            Log.d(CamTAG, "This is right after Camera2BasicFragment.newInstance()");
-        }
+//        if (null == savedInstanceState) {
+////            Log.d(CamTAG, "This is right before Camera2BasicFragment.newInstance()");
+////            ************************************************************************************
+//            getFragmentManager().beginTransaction()
+//                    .replace(R.id.container, Camera2BasicFragment.newInstance())
+//                    .commit();
+////            Log.d(CamTAG, "This is right after Camera2BasicFragment.newInstance()");
+//        }
         //    ------------------------------ CAMERA2 ------------------------------
 
         //    ------------------------------ CAMERA ------------------------------
@@ -84,18 +89,20 @@ public class MainActivity extends ActionBarActivity implements ConnectionCallbac
     public void onConnected(Bundle connectionHint) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
-            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
+//            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
+//            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
             mLatitude = String.valueOf(mLastLocation.getLatitude());
             mLongitude = String.valueOf(mLastLocation.getLongitude());
             Log.d(LocTAG, "This is the latitude: "+mLatitude);
             Log.d(LocTAG, "This is the longitude: "+mLongitude);
+            Toast.makeText(this, "This is the lat, long: " + mLatitude + ", " + mLongitude, Toast.LENGTH_LONG).show();
             //    ------------------------------ PARSE ------------------------------
             // Set lat & long objects
-            ParseObject testObject = new ParseObject("LocInfo");
-            testObject.put("Latitude", mLatitude);
-            testObject.put("Longitude", mLongitude);
-            testObject.saveInBackground();
+            ParseObject mParseSessionObject = new ParseObject("LocationAndPics");
+            mParseSessionObject.put("Latitude", mLatitude);
+            mParseSessionObject.put("Longitude", mLongitude);
+            mParseSessionObject.saveInBackground();
+            mParseSessionObject.pinInBackground();
             //    ------------------------------ PARSE ------------------------------
 
         } else {
