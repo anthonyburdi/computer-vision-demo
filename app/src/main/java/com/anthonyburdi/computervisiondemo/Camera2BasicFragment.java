@@ -61,13 +61,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Camera2BasicFragment extends Fragment implements View.OnClickListener {
 
-
-    //    ------------------------------ DATA STORE ------------------------------
-
-//    String mParseID;
-
-    //    ------------------------------ DATA STORE ------------------------------
-
     /**
      * Conversion from screen rotation to JPEG orientation.
      */
@@ -786,69 +779,51 @@ public class Camera2BasicFragment extends Fragment implements View.OnClickListen
 
         @Override
         public void run() {
-//            // get the image
-//            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
-//            byte[] bytes = new byte[buffer.remaining()];
-//            buffer.get(bytes);
-//            FileOutputStream output = null;
-//            try {
-//                output = new FileOutputStream(mFile);
-//                output.write(bytes);
-                //    ------------------------------ DATA STORE ------------------------------
-                // Get parse object created in local datastore
-                ParseQuery<ParseObject> query = ParseQuery.getQuery("LocationAndPics");
-                query.fromLocalDatastore();
-                query.orderByDescending("createdAt");
-                query.getFirstInBackground(new GetCallback<ParseObject>() {
-                    @Override
-                    public void done(ParseObject parseObject, ParseException e) {
-                        if (e == null ) {
-
-                            // get the image
-                            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
-                            byte[] bytes = new byte[buffer.remaining()];
-                            buffer.get(bytes);
-                            FileOutputStream output = null;
-
-                            try {
-                                output = new FileOutputStream(mFile);
-                            } catch (FileNotFoundException e1) {
-                                e1.printStackTrace();
-                            }
-                            try {
-                                output.write(bytes);
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
-                            }
-
-                            // Write image to Parse.com database
-                            ParseFile file = new ParseFile("pic.jpg", bytes);
-                            file.saveInBackground();
-                            // Get Parse.com object
-                            ParseObject mParseSessionObject = parseObject;
-                            mParseSessionObject.put("CameraPics", file);
-                            mParseSessionObject.saveInBackground();
-
-                        } else {
-                            // somethign went wrong
-                        }
+            ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
+            // made byte[] final bc it's accessed in inner class (IDE forced this)
+            final byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            FileOutputStream output = null;
+            try {
+                output = new FileOutputStream(mFile);
+                output.write(bytes);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                mImage.close();
+                if (null != output) {
+                    try {
+                        output.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                });
-                //    ------------------------------ DATA STORE ------------------------------
+                }
+            }
+            //    ------------------------------ PARSE DATA STORE ------------------------------
+            // Get parse object created in local data store when app was opened
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("LocationAndPics");
+            query.fromLocalDatastore();
+            query.orderByDescending("createdAt");
+            query.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject parseObject, ParseException e) {
+                    if (e == null ) {
+                        // Write image to Parse.com database
+                        ParseFile file = new ParseFile("pic.jpg", bytes);
+                        file.saveInBackground();
+                        // Get Parse.com object with location, put image in same record
+                        ParseObject mParseSessionObject = parseObject;
+                        mParseSessionObject.put("CameraPics", file);
+                        mParseSessionObject.saveInBackground();
 
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } finally {
-//                mImage.close();
-//                if (null != output) {
-//                    try {
-//                        output.close();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
+                    } else {
+                        // something went wrong
+                    }
+                }
+            });
+            //    ------------------------------ PARSE DATA STORE ------------------------------
         }
     }
 
